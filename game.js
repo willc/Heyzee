@@ -154,13 +154,12 @@
     state.held = [false, false, false, false, false];
     state.rollsLeft = 3;
     state.hasRolled = false;
+    state.busy = state.current === 1; // set before UI updates so controls reflect it
     renderDice(); renderCard(); updateControls(); setActivePlayer();
     if (state.current === 1) {
-      state.busy = true;
       statusEl.textContent = `${state.aiName} is thinking…`;
       setTimeout(aiTurn, 700);
     } else {
-      state.busy = false;
       statusEl.textContent = 'Your turn — roll the dice.';
     }
   }
