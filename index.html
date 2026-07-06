@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heyzee</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="felt-green dice-classic">
+  <header class="topbar">
+    <h1 class="logo">Heyzee</h1>
+    <div class="toggles">
+      <button id="feltToggle" class="chip" title="Table color">Green felt</button>
+      <button id="diceToggle" class="chip" title="Dice style">Classic dice</button>
+      <button id="muteToggle" class="chip" title="Sound">🔊</button>
+    </div>
+  </header>
+
+  <main class="table">
+    <section class="play">
+      <div class="players">
+        <div class="player" id="player-you"><span class="pname">You</span><span class="ptotal" id="total-0">0</span></div>
+        <div class="player" id="player-ai"><span class="pname">AI</span><span class="ptotal" id="total-1">0</span></div>
+      </div>
+
+      <div class="dice-tray" id="diceTray"></div>
+
+      <div class="controls">
+        <button id="rollBtn" class="roll-btn">Roll</button>
+        <span class="rolls" id="rollsLeft">Rolls left: 3</span>
+      </div>
+
+      <p class="status" id="status">Your turn — roll the dice.</p>
+    </section>
+
+    <section class="card-wrap">
+      <table class="scorecard" id="scorecard"></table>
+    </section>
+  </main>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="modal">
+      <h2 id="overlayTitle">Game Over</h2>
+      <p id="overlayBody"></p>
+      <button id="newGameBtn" class="roll-btn">New Game</button>
+    </div>
+  </div>
+
+  <script src="ai.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
