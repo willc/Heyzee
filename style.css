@@ -119,7 +119,8 @@ body {
 .scorecard { width: 100%; border-collapse: collapse; font-size: 14px; }
 .scorecard th, .scorecard td { border: 1px solid var(--line); }
 .scorecard th { text-align: left; padding: 9px 12px; color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; background: rgba(0,0,0,.18); }
-.scorecard th.num { text-align: center; width: 60px; }
+.scorecard th.num { text-align: center; width: 62px; }
+.scorecard th.num.name { font-size: 10px; line-height: 1.2; white-space: normal; text-transform: none; word-break: normal; overflow-wrap: break-word; hyphens: none; vertical-align: bottom; padding: 6px 5px; }
 .scorecard td { padding: 8px 12px; }
 .scorecard tr.cat .catname { color: var(--ink); }
 .scorecard tr.cat td.val, .scorecard tr.cat td.aival { text-align: center; width: 60px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
@@ -128,6 +129,12 @@ body {
 .scorecard tr.cat.open-locked td.val { color: var(--ink-dim); opacity: .4; }
 .scorecard tr.cat.used td.val, .scorecard tr.cat.used td.aival { color: var(--ink); }
 .scorecard tr.subtotal td { font-weight: 700; color: var(--accent); background: rgba(0,0,0,.15); }
+.scorecard tr.subtotal td:first-child { color: var(--ink-dim); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: .04em; }
+.scorecard tr.subtotal.total td { color: var(--ink); background: rgba(0,0,0,.28); }
+.scorecard tr.subtotal.total td.val { color: var(--accent); }
+.scorecard tr.subtotal.grand td { background: rgba(232,195,126,.16); border-top: 2px solid var(--accent); }
+.scorecard tr.subtotal.grand td:first-child { color: var(--accent); }
+.scorecard tr.subtotal.grand td.val { color: var(--ink); font-size: 16px; }
 
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: grid; place-items: center; z-index: 20; }
 .overlay.hidden { display: none; }

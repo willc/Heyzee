@@ -126,14 +126,15 @@
 
   /* ---------- scoring / turn flow ---------- */
   function upperTotal(card) { return UPPER_IDS.reduce((t, id) => t + (card[id] || 0), 0); }
-  function grandTotal(p) {
+  function upperBonus(card) { return upperTotal(card) >= 63 ? 35 : 0; }
+  function upperSection(card) { return upperTotal(card) + upperBonus(card); }
+  function lowerTotal(p) {
     const card = state.cards[p];
-    const upper = upperTotal(card);
-    const bonus = upper >= 63 ? 35 : 0;
     let lower = 0;
     for (const c of CATEGORIES) if (c.section === 'lower' && card[c.id] != null) lower += card[c.id];
-    return upper + bonus + lower + state.yahtzeeBonus[p];
+    return lower + state.yahtzeeBonus[p];
   }
+  function grandTotal(p) { return upperSection(state.cards[p]) + lowerTotal(p); }
 
   function commitScore(p, catId) {
     const joker = jokerActive(state.dice, state.cards[p]);
@@ -205,16 +206,22 @@
     const joker = active && jokerActive(state.dice, state.cards[0]);
     const you = escapeHtml(state.youName), ai = escapeHtml(state.aiName);
     const rows = [];
-    rows.push(`<tr><th>Upper</th><th class="num" title="${you}">${clip(you)}</th><th class="num" title="${ai}">${clip(ai)}</th></tr>`);
+    const cardY = state.cards[0], cardA = state.cards[1];
+    const sub = (label, vy, va, cls) => `<tr class="subtotal${cls ? ' ' + cls : ''}"><td>${label}</td><td class="val">${vy}</td><td class="val">${va}</td></tr>`;
+
+    rows.push(`<tr><th>Upper</th><th class="num name" title="${you}">${you}</th><th class="num name" title="${ai}">${ai}</th></tr>`);
     for (const c of CATEGORIES.filter((x) => x.section === 'upper')) rows.push(catRow(c, active, legal, joker));
-    const uYou = upperTotal(state.cards[0]), uAi = upperTotal(state.cards[1]);
-    rows.push(`<tr class="subtotal"><td>Bonus (63+)</td><td class="val">${uYou >= 63 ? '+35' : `${uYou}/63`}</td><td class="val">${uAi >= 63 ? '+35' : `${uAi}/63`}</td></tr>`);
+    const uY = upperTotal(cardY), uA = upperTotal(cardA);
+    rows.push(sub('Upper subtotal', uY, uA));
+    rows.push(sub('Bonus (63+)', uY >= 63 ? '+35' : `${uY}/63`, uA >= 63 ? '+35' : `${uA}/63`));
+    rows.push(sub('Upper total', upperSection(cardY), upperSection(cardA), 'total'));
+
     rows.push(`<tr><th>Lower</th><th class="num"></th><th class="num"></th></tr>`);
     for (const c of CATEGORIES.filter((x) => x.section === 'lower')) rows.push(catRow(c, active, legal, joker));
-    if (state.yahtzeeBonus[0] || state.yahtzeeBonus[1]) {
-      rows.push(`<tr class="subtotal"><td>Heyzee bonus</td><td class="val">${state.yahtzeeBonus[0]}</td><td class="val">${state.yahtzeeBonus[1]}</td></tr>`);
-    }
-    rows.push(`<tr class="subtotal"><td>Total</td><td class="val">${grandTotal(0)}</td><td class="val">${grandTotal(1)}</td></tr>`);
+    rows.push(sub('Heyzee bonus', state.yahtzeeBonus[0], state.yahtzeeBonus[1]));
+    rows.push(sub('Lower total', lowerTotal(0), lowerTotal(1), 'total'));
+
+    rows.push(sub('Grand total', grandTotal(0), grandTotal(1), 'grand'));
     cardEl.innerHTML = rows.join('');
     cardEl.querySelectorAll('tr.cat.open-you td.val').forEach((td) => {
       td.addEventListener('click', () => {
@@ -298,7 +305,6 @@
 
   /* ---------- helpers ---------- */
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-  function clip(s) { return s.length > 8 ? s.slice(0, 7) + '…' : s; }
 
   /* ---------- name input ---------- */
   const youNameInput = $('youName');
