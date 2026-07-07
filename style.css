@@ -143,6 +143,8 @@ body {
 .scorecard tr.subtotal.grand td:first-child { color: var(--accent); }
 .scorecard tr.subtotal.grand td.val { color: var(--ink); font-size: 16px; }
 
+#fireworks { position: fixed; inset: 0; pointer-events: none; z-index: 30; }
+
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: grid; place-items: center; z-index: 20; }
 .overlay.hidden { display: none; }
 .modal { background: linear-gradient(160deg, #262421, #17150f); border: 1px solid var(--line); border-radius: 20px; padding: 32px 40px; text-align: center; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }

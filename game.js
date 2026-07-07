@@ -70,6 +70,66 @@
     } catch (e) {}
   }
 
+  function sndHeyzee() {
+    if (state.muted) return;
+    try {
+      const c = ctx(), notes = [523, 659, 784, 1047, 1319];
+      notes.forEach((f, i) => {
+        const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + i * 0.085;
+        o.type = 'triangle'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.09, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+        o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.32);
+      });
+    } catch (e) {}
+  }
+
+  /* ---------- fireworks celebration (~2.6s) ---------- */
+  let fwActive = false;
+  function launchFireworks() {
+    const canvas = $('fireworks');
+    if (!canvas || fwActive) return;
+    fwActive = true;
+    const cx2d = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.width = window.innerWidth * dpr;
+    const H = canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    const palette = ['#e8c37e', '#ff5964', '#7ad19a', '#ffd93d', '#6ec6ff', '#ff9de2'];
+    let particles = [];
+    const burst = () => {
+      const bx = W * (0.18 + Math.random() * 0.64), by = H * (0.12 + Math.random() * 0.42);
+      const n = 46, base = palette[Math.floor(Math.random() * palette.length)];
+      for (let i = 0; i < n; i++) {
+        const a = (Math.PI * 2 * i) / n + Math.random() * 0.2, sp = (2 + Math.random() * 3.2) * dpr;
+        particles.push({ x: bx, y: by, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+          life: 1, decay: 0.011 + Math.random() * 0.012, size: (1.4 + Math.random() * 2) * dpr,
+          color: Math.random() < 0.28 ? '#ffffff' : base });
+      }
+    };
+    const start = performance.now(), burstUntil = 2200; let lastBurst = 0;
+    burst();
+    const frame = (now) => {
+      const t = now - start;
+      cx2d.clearRect(0, 0, W, H);
+      if (t < burstUntil && now - lastBurst > 300) { burst(); lastBurst = now; }
+      for (const p of particles) { p.vx *= 0.985; p.vy = p.vy * 0.985 + 0.05 * dpr; p.x += p.vx; p.y += p.vy; p.life -= p.decay; }
+      particles = particles.filter((p) => p.life > 0);
+      for (const p of particles) {
+        cx2d.globalAlpha = Math.max(0, p.life);
+        cx2d.fillStyle = p.color;
+        cx2d.beginPath(); cx2d.arc(p.x, p.y, p.size, 0, Math.PI * 2); cx2d.fill();
+      }
+      cx2d.globalAlpha = 1;
+      if (t < burstUntil || particles.length) requestAnimationFrame(frame);
+      else { cx2d.clearRect(0, 0, W, H); fwActive = false; }
+    };
+    requestAnimationFrame(frame);
+  }
+  function celebrateHeyzee() { launchFireworks(); sndHeyzee(); }
+
   /* ---------- dice ---------- */
   function setDieFace(el, face) {
     el.dataset.face = String(face);
@@ -122,6 +182,7 @@
       state.dice = final;
       state.busy = false;
       renderDice(); renderCard(); updateControls(); updateStatus();
+      if (isYahtzeeDice(final)) celebrateHeyzee();
     });
   }
 
