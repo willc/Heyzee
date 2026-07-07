@@ -15,6 +15,7 @@
     busy: false,
     youName: localStorage.getItem('heyzee_name') || 'You',
     aiName: HeyzeeAI.aiRandomName(),
+    best: parseInt(localStorage.getItem('heyzee_best') || '0', 10) || 0,
   };
   for (const c of CATEGORIES) { state.cards[0][c.id] = null; state.cards[1][c.id] = null; }
 
@@ -282,12 +283,25 @@
     updateControls();
   }
 
+  function renderBest() {
+    $('bestScore').textContent = `Best: ${state.best || '—'}`;
+  }
+
   function finishGame() {
     updateTotals();
     const you = grandTotal(0), ai = grandTotal(1);
     const t = you > ai ? 'You win! 🎉' : you < ai ? `${state.aiName} wins` : "It's a tie";
+    const newBest = you > state.best;
+    if (newBest) {
+      state.best = you;
+      localStorage.setItem('heyzee_best', String(you));
+      renderBest();
+      const b = $('bestScore'); b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 2500);
+    }
     $('overlayTitle').textContent = t;
-    $('overlayBody').textContent = `${state.youName} ${you} — ${state.aiName} ${ai}`;
+    $('overlayBody').innerHTML = `${escapeHtml(state.youName)} ${you} — ${escapeHtml(state.aiName)} ${ai}`
+      + (newBest ? `<br><span style="color:var(--accent);font-weight:700">🏆 New personal best!</span>`
+        : state.best ? `<br><span style="color:var(--ink-dim)">Best: ${state.best}</span>` : '');
     $('overlay').classList.remove('hidden');
   }
 
@@ -338,5 +352,6 @@
   /* ---------- boot ---------- */
   document.body.classList.add('felt-green', 'dice-classic');
   $('aiNameLabel').textContent = state.aiName;
+  renderBest();
   startTurn();
 })();

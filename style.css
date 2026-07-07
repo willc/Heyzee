@@ -33,11 +33,18 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   max-width: 980px; margin: 0 auto 20px;
 }
+.brand { display: flex; align-items: baseline; gap: 12px; }
 .logo {
   font-weight: 800; letter-spacing: -0.02em; font-size: 30px;
   color: var(--accent);
   text-shadow: 0 2px 0 rgba(0,0,0,0.25);
 }
+.best {
+  font-size: 13px; color: var(--ink-dim); font-variant-numeric: tabular-nums;
+  padding: 4px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  transition: color .3s ease, border-color .3s ease;
+}
+.best.flash { color: var(--accent); border-color: var(--accent); }
 .toggles { display: flex; gap: 8px; }
 .chip {
   background: var(--panel); color: var(--ink); border: 1px solid var(--line);
