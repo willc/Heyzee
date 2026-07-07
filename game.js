@@ -26,12 +26,19 @@
   const cardEl = $('scorecard');
 
   /* ---------- audio: synthesized dice clatter (filtered noise bursts) ---------- */
-  let ac = null;
+  const MASTER_VOL = 2.6; // overall loudness multiplier
+  let ac = null, master = null;
   function ctx() {
-    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (!ac) {
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      master = ac.createGain();
+      master.gain.value = MASTER_VOL;
+      master.connect(ac.destination);
+    }
     if (ac.state === 'suspended') ac.resume();
     return ac;
   }
+  function out() { return master; } // route sounds through the master gain
   function clack(when, dur, freq, gain) {
     const c = ac, sr = c.sampleRate, n = Math.max(1, Math.floor(sr * dur));
     const buf = c.createBuffer(1, n, sr), data = buf.getChannelData(0);
@@ -42,7 +49,7 @@
     g.gain.setValueAtTime(0.0001, when);
     g.gain.exponentialRampToValueAtTime(gain, when + 0.004);
     g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-    src.connect(bp); bp.connect(g); g.connect(c.destination);
+    src.connect(bp); bp.connect(g); g.connect(out());
     src.start(when); src.stop(when + dur);
   }
   function sndRoll() {
@@ -66,7 +73,7 @@
       o.type = 'sine'; o.frequency.setValueAtTime(660, c.currentTime);
       o.frequency.exponentialRampToValueAtTime(990, c.currentTime + 0.12);
       g.gain.setValueAtTime(0.07, c.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.22);
-      o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + 0.22);
+      o.connect(g); g.connect(out()); o.start(); o.stop(c.currentTime + 0.22);
     } catch (e) {}
   }
 
@@ -80,7 +87,7 @@
         g.gain.setValueAtTime(0.0001, t);
         g.gain.exponentialRampToValueAtTime(0.09, t + 0.02);
         g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
-        o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.32);
+        o.connect(g); g.connect(out()); o.start(t); o.stop(t + 0.32);
       });
     } catch (e) {}
   }
