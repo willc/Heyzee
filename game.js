@@ -229,6 +229,7 @@
     state.held = [false, false, false, false, false];
     state.rollsLeft = 3;
     state.hasRolled = false;
+    $('lastMove').textContent = ''; // clear the previous player's move summary
     state.busy = state.current === 1; // set before UI updates so controls reflect it
     renderDice(); renderCard(); updateControls(); setActivePlayer();
     if (state.current === 1) {
@@ -266,7 +267,7 @@
         } else {
           const catId = HeyzeeAI.aiChooseCategory(state.dice, card);
           commitScore(1, catId); renderCard();
-          setTimeout(endTurn, 750);
+          setTimeout(endTurn, 1500); // hold so the move summary is readable before your turn clears it
         }
       };
       setTimeout(step, 600);
