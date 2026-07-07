@@ -284,7 +284,7 @@
   }
 
   function renderBest() {
-    $('bestScore').textContent = `Best: ${state.best || '—'}`;
+    $('bestScore').textContent = `Your personal best: ${state.best || '—'}`;
   }
 
   function finishGame() {
