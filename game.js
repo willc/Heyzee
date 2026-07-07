@@ -172,6 +172,7 @@
 
   function humanRoll() {
     if (state.busy || state.current !== 0 || state.rollsLeft === 0) return;
+    if (!state.hasRolled) $('lastMove').textContent = ''; // clear on your first roll of the turn
     state.busy = true;
     const final = state.dice.map((d, i) => (state.held[i] ? d : 1 + Math.floor(Math.random() * 6)));
     state.rollsLeft--;
@@ -229,7 +230,6 @@
     state.held = [false, false, false, false, false];
     state.rollsLeft = 3;
     state.hasRolled = false;
-    $('lastMove').textContent = ''; // clear the previous player's move summary
     state.busy = state.current === 1; // set before UI updates so controls reflect it
     renderDice(); renderCard(); updateControls(); setActivePlayer();
     if (state.current === 1) {
@@ -247,6 +247,7 @@
   /* ---------- opponent turn ---------- */
   function aiTurn() {
     const card = state.cards[1];
+    $('lastMove').textContent = ''; // clear on the AI's first roll of the turn
     const final0 = state.dice.map(() => 1 + Math.floor(Math.random() * 6));
     state.hasRolled = true;
     sndRoll();
@@ -267,7 +268,7 @@
         } else {
           const catId = HeyzeeAI.aiChooseCategory(state.dice, card);
           commitScore(1, catId); renderCard();
-          setTimeout(endTurn, 1500); // hold so the move summary is readable before your turn clears it
+          setTimeout(endTurn, 750);
         }
       };
       setTimeout(step, 600);
