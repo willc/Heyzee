@@ -201,9 +201,21 @@
   function commitScore(p, catId) {
     const joker = jokerActive(state.dice, state.cards[p]);
     // Heyzee bonus: extra five-of-a-kind after a scored 50 in the Heyzee box
-    if (isYahtzeeDice(state.dice) && state.cards[p].yahtzee === 50) state.yahtzeeBonus[p] += 100;
-    state.cards[p][catId] = scoreCategory(catId, state.dice, joker);
+    const gotBonus = isYahtzeeDice(state.dice) && state.cards[p].yahtzee === 50;
+    if (gotBonus) state.yahtzeeBonus[p] += 100;
+    const score = scoreCategory(catId, state.dice, joker);
+    state.cards[p][catId] = score;
     sndScore();
+    showMove(p, catId, score, gotBonus);
+  }
+
+  function showMove(p, catId, score, gotBonus) {
+    const name = p === 0 ? state.youName : state.aiName;
+    const catName = CATEGORIES.find((c) => c.id === catId).name;
+    const bonus = gotBonus ? ' (+100 Heyzee bonus!)' : '';
+    const el = $('lastMove');
+    el.textContent = `${name} scored ${score} in ${catName}${bonus}`;
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
   }
 
   function endTurn() {
@@ -373,6 +385,7 @@
     state.dice = [1, 1, 1, 1, 1];
     state.aiName = HeyzeeAI.aiRandomName();
     $('aiNameLabel').textContent = state.aiName;
+    $('lastMove').textContent = '';
     $('overlay').classList.add('hidden');
     updateTotals();
     startTurn();

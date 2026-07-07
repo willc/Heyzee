@@ -121,6 +121,9 @@ body {
 .roll-btn:disabled { opacity: .45; cursor: not-allowed; }
 .rolls { color: var(--ink-dim); font-size: 14px; }
 .status { text-align: center; color: var(--ink-dim); font-size: 14px; min-height: 20px; }
+.lastmove { text-align: center; font-size: 13px; color: var(--accent); min-height: 18px; margin-top: 4px; opacity: .9; }
+.lastmove.pop { animation: movepop .45s ease; }
+@keyframes movepop { 0% { transform: scale(.92); opacity: 0; } 60% { transform: scale(1.03); } 100% { transform: scale(1); opacity: .9; } }
 
 .card-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .scorecard { width: 100%; border-collapse: collapse; font-size: 14px; }
