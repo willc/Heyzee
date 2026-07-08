@@ -13,6 +13,7 @@
       <span class="best" id="bestScore" title="Your best grand total">Your personal best: —</span>
     </div>
     <div class="toggles">
+      <button id="statsToggle" class="chip" title="Statistics">📊 Stats</button>
       <button id="diffToggle" class="chip" title="Opponent difficulty">AI: Medium</button>
       <button id="feltToggle" class="chip" title="Table color">Green felt</button>
       <button id="diceToggle" class="chip" title="Dice style">Classic dice</button>
@@ -42,6 +43,14 @@
       <table class="scorecard" id="scorecard"></table>
     </section>
   </main>
+
+  <div class="overlay hidden" id="statsOverlay">
+    <div class="modal statsmodal">
+      <h2>Statistics</h2>
+      <div class="stats-grid" id="statsGrid"></div>
+      <button id="statsClose" class="roll-btn">Close</button>
+    </div>
+  </div>
 
   <canvas id="fireworks" aria-hidden="true"></canvas>
 

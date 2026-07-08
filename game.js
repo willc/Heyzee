@@ -17,8 +17,16 @@
     aiName: HeyzeeAI.aiRandomName(),
     best: parseInt(localStorage.getItem('heyzee_best') || '0', 10) || 0,
     difficulty: localStorage.getItem('heyzee_diff') || 'medium',
+    stats: loadStats(),
   };
   if (!HeyzeeAI.SKILL[state.difficulty]) state.difficulty = 'medium';
+
+  function loadStats() {
+    const base = { games: 0, wins: 0, losses: 0, ties: 0, heyzees: 0, upperBonuses: 0, totalScore: 0, streak: 0, bestStreak: 0 };
+    try { return Object.assign(base, JSON.parse(localStorage.getItem('heyzee_stats') || '{}')); }
+    catch (e) { return base; }
+  }
+  function saveStats() { localStorage.setItem('heyzee_stats', JSON.stringify(state.stats)); }
   for (const c of CATEGORIES) { state.cards[0][c.id] = null; state.cards[1][c.id] = null; }
 
   const $ = (id) => document.getElementById(id);
@@ -215,6 +223,7 @@
     if (gotBonus) state.yahtzeeBonus[p] += 100;
     const score = scoreCategory(catId, state.dice, joker);
     state.cards[p][catId] = score;
+    if (p === 0 && isYahtzeeDice(state.dice)) { state.stats.heyzees++; saveStats(); }
     sndScore();
     showMove(p, catId, score, gotBonus);
   }
@@ -371,9 +380,42 @@
     $('bestScore').textContent = `Your personal best: ${state.best || '—'}`;
   }
 
+  function renderStats() {
+    const s = state.stats;
+    const winRate = s.games ? Math.round((100 * s.wins) / s.games) + '%' : '—';
+    const avg = s.games ? Math.round(s.totalScore / s.games) : '—';
+    const tile = (num, lbl, cls) => `<div class="stat-tile${cls ? ' ' + cls : ''}"><div class="stat-num">${num}</div><div class="stat-lbl">${lbl}</div></div>`;
+    const wide = (num, lbl, cls) => `<div class="stat-tile wide${cls ? ' ' + cls : ''}"><div class="stat-lbl">${lbl}</div><div class="stat-num">${num}</div></div>`;
+    $('statsGrid').innerHTML = [
+      tile(s.games, 'Games'),
+      tile(s.wins, 'Wins', 'accent'),
+      tile(s.losses, 'Losses'),
+      tile(winRate, 'Win rate', 'accent'),
+      tile(s.streak, 'Streak'),
+      tile(s.bestStreak, 'Best streak'),
+      tile(state.best || '—', 'Best score', 'accent'),
+      tile(avg, 'Avg score'),
+      tile(s.ties, 'Ties'),
+      wide(s.heyzees, 'Heyzees rolled', 'accent'),
+      wide(s.upperBonuses, 'Upper bonuses (63+)'),
+    ].join('');
+  }
+
+  function recordGameStats(you, ai) {
+    const s = state.stats;
+    s.games++;
+    s.totalScore += you;
+    if (upperTotal(state.cards[0]) >= 63) s.upperBonuses++;
+    if (you > ai) { s.wins++; s.streak++; if (s.streak > s.bestStreak) s.bestStreak = s.streak; }
+    else if (you < ai) { s.losses++; s.streak = 0; }
+    else { s.ties++; } // a tie neither extends nor breaks a win streak
+    saveStats();
+  }
+
   function finishGame() {
     updateTotals();
     const you = grandTotal(0), ai = grandTotal(1);
+    recordGameStats(you, ai);
     const t = you > ai ? 'You win! 🎉' : you < ai ? `${state.aiName} wins` : "It's a tie";
     const newBest = you > state.best;
     if (newBest) {
@@ -442,6 +484,9 @@
   });
   rollBtn.addEventListener('click', humanRoll);
   $('newGameBtn').addEventListener('click', newGame);
+  $('statsToggle').addEventListener('click', () => { renderStats(); $('statsOverlay').classList.remove('hidden'); });
+  $('statsClose').addEventListener('click', () => $('statsOverlay').classList.add('hidden'));
+  $('statsOverlay').addEventListener('click', (e) => { if (e.target === $('statsOverlay')) $('statsOverlay').classList.add('hidden'); });
 
   /* ---------- boot ---------- */
   document.body.classList.add('felt-green', 'dice-classic');
