@@ -16,7 +16,9 @@
     youName: localStorage.getItem('heyzee_name') || 'You',
     aiName: HeyzeeAI.aiRandomName(),
     best: parseInt(localStorage.getItem('heyzee_best') || '0', 10) || 0,
+    difficulty: localStorage.getItem('heyzee_diff') || 'medium',
   };
+  if (!HeyzeeAI.SKILL[state.difficulty]) state.difficulty = 'medium';
   for (const c of CATEGORIES) { state.cards[0][c.id] = null; state.cards[1][c.id] = null; }
 
   const $ = (id) => document.getElementById(id);
@@ -263,7 +265,7 @@
       renderDice();
       let rolls = 2;
       const step = () => {
-        const hold = HeyzeeAI.aiChooseHold(state.dice, card);
+        const hold = HeyzeeAI.aiChooseHold(state.dice, card, state.difficulty);
         state.held = hold; renderDice();
         if (rolls > 0 && !hold.every(Boolean)) {
           rolls--;
@@ -273,7 +275,7 @@
             animateRoll(nxt, hold, () => { state.dice = nxt; renderDice(); setTimeout(step, 550); });
           }, 500);
         } else {
-          const catId = HeyzeeAI.aiChooseCategory(state.dice, card);
+          const catId = HeyzeeAI.aiChooseCategory(state.dice, card, state.difficulty);
           commitScore(1, catId); renderCard();
           setTimeout(endTurn, 750);
         }
@@ -429,6 +431,15 @@
     state.muted = !state.muted;
     e.target.textContent = state.muted ? '🔇' : '🔊';
   });
+  const DIFF_ORDER = ['easy', 'medium', 'hard'];
+  const DIFF_LABEL = { easy: 'AI: Easy', medium: 'AI: Medium', hard: 'AI: Hard' };
+  function renderDifficulty() { $('diffToggle').textContent = DIFF_LABEL[state.difficulty]; }
+  $('diffToggle').addEventListener('click', () => {
+    const next = DIFF_ORDER[(DIFF_ORDER.indexOf(state.difficulty) + 1) % DIFF_ORDER.length];
+    state.difficulty = next;
+    localStorage.setItem('heyzee_diff', next);
+    renderDifficulty();
+  });
   rollBtn.addEventListener('click', humanRoll);
   $('newGameBtn').addEventListener('click', newGame);
 
@@ -436,5 +447,6 @@
   document.body.classList.add('felt-green', 'dice-classic');
   $('aiNameLabel').textContent = state.aiName;
   renderBest();
+  renderDifficulty();
   startTurn();
 })();

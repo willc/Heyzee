@@ -103,8 +103,19 @@ function evalHoldMask(dice, held, card, samples) {
   return total / samples;
 }
 
-function aiChooseHold(dice, card) {
-  const samples = 60;
+/* ---- difficulty: only changes how often the AI plays its best move.
+       Dice are always fair; the human's odds never change. ----
+   pBest  = chance the AI uses its strong (expected-value) decision.
+   samples = Monte-Carlo samples for the hold search (more = sharper play). */
+const SKILL = {
+  easy:   { pBest: 0.22, samples: 24 },
+  medium: { pBest: 0.58, samples: 45 },
+  hard:   { pBest: 0.95, samples: 90 },
+};
+function skill(level) { return SKILL[level] || SKILL.medium; }
+
+/* --- strong (near-optimal) decisions --- */
+function strongHold(dice, card, samples) {
   let bestMask = dice.map(() => true);
   let bestVal = evalHoldMask(dice, bestMask, card, samples);
   for (let mask = 0; mask < 32; mask++) {
@@ -114,10 +125,7 @@ function aiChooseHold(dice, card) {
   }
   return bestMask;
 }
-
-/* Choose a category to score, respecting joker legality and joker scoring. */
-function aiChooseCategory(dice, card) {
-  const legal = legalCategories(dice, card);
+function strongCategory(dice, card, legal) {
   const joker = jokerActive(dice, card);
   const openCount = CATEGORIES.filter((c) => card[c.id] == null).length;
   let bestId = legal[0], bestScore = -1e9;
@@ -133,4 +141,42 @@ function aiChooseCategory(dice, card) {
   return bestId;
 }
 
-const HeyzeeAI = { aiChooseHold, aiChooseCategory, aiRandomName };
+/* --- weak (novice) decisions --- */
+// Keep the biggest matching group (prefer the higher face on ties); else keep the single highest die.
+function naiveHold(dice) {
+  const c = counts(dice);
+  let best = 0, val = 0;
+  for (let f = 6; f >= 1; f--) { if (c[f] > best) { best = c[f]; val = f; } }
+  if (best >= 2) return dice.map((d) => d === val);
+  const hi = Math.max(...dice);
+  return dice.map((d) => d === hi);
+}
+function randomHold() { return [0, 1, 2, 3, 4].map(() => Math.random() < 0.5); }
+// Grab the most raw points available right now, ignoring strategy (wastes premium boxes, ignores the bonus).
+function naiveMaxRaw(dice, card, legal) {
+  const joker = jokerActive(dice, card);
+  let bestId = legal[0], bestS = -1;
+  for (const id of legal) {
+    const s = scoreCategory(id, dice, joker);
+    if (s > bestS) { bestS = s; bestId = id; }
+  }
+  return bestId;
+}
+
+/* --- level-aware entry points (called by the game each AI turn) --- */
+function aiChooseHold(dice, card, level) {
+  const s = skill(level);
+  if (Math.random() < s.pBest) return strongHold(dice, card, s.samples);
+  if (level === 'easy' && Math.random() < 0.5) return randomHold();
+  return naiveHold(dice);
+}
+function aiChooseCategory(dice, card, level) {
+  const s = skill(level);
+  const legal = legalCategories(dice, card);
+  if (legal.length <= 1) return legal[0];               // forced (joker) placement
+  if (Math.random() < s.pBest) return strongCategory(dice, card, legal);
+  if (level === 'easy' && Math.random() < 0.5) return legal[Math.floor(Math.random() * legal.length)];
+  return naiveMaxRaw(dice, card, legal);
+}
+
+const HeyzeeAI = { aiChooseHold, aiChooseCategory, aiRandomName, SKILL };
