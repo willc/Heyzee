@@ -109,21 +109,30 @@ function evalHoldMask(dice, held, card, samples) {
    samples = Monte-Carlo samples for the hold search (more = sharper play). */
 const SKILL = {
   easy:   { pBest: 0.22, samples: 24 },
-  medium: { pBest: 0.58, samples: 45 },
-  hard:   { pBest: 0.95, samples: 90 },
+  medium: { pBest: 0.58, samples: 80 },
+  hard:   { pBest: 0.95, samples: 240 },
 };
 function skill(level) { return SKILL[level] || SKILL.medium; }
 
 /* --- strong (near-optimal) decisions --- */
 function strongHold(dice, card, samples) {
-  let bestMask = dice.map(() => true);
-  let bestVal = evalHoldMask(dice, bestMask, card, samples);
+  const evs = [];
+  let bestVal = -1e9;
   for (let mask = 0; mask < 32; mask++) {
     const held = [0, 1, 2, 3, 4].map((i) => Boolean(mask & (1 << i)));
     const v = evalHoldMask(dice, held, card, samples);
-    if (v > bestVal + 0.01) { bestVal = v; bestMask = held; }
+    evs.push({ held, v, kept: held.filter(Boolean).length });
+    if (v > bestVal) bestVal = v;
   }
-  return bestMask;
+  // Among keep-sets within a hair of the best expected value, hold the fewest dice.
+  // This rerolls stray non-matching dice (e.g. the odd 4 kept beside three 6s) and
+  // preserves reroll upside, instead of letting sample noise keep junk.
+  const EPS = 0.6;
+  let choice = null;
+  for (const e of evs) {
+    if (e.v >= bestVal - EPS && (!choice || e.kept < choice.kept)) choice = e;
+  }
+  return choice.held;
 }
 function strongCategory(dice, card, legal) {
   const joker = jokerActive(dice, card);
