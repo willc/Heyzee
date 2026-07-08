@@ -224,6 +224,7 @@
     const score = scoreCategory(catId, state.dice, joker);
     state.cards[p][catId] = score;
     if (p === 0 && isYahtzeeDice(state.dice)) { state.stats.heyzees++; saveStats(); }
+    if (p === 1 && isYahtzeeDice(state.dice)) celebrateHeyzee(); // human already celebrates on the roll
     sndScore();
     showMove(p, catId, score, gotBonus);
   }
