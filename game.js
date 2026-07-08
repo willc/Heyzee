@@ -102,6 +102,37 @@
     } catch (e) {}
   }
 
+  // One melody note with an attack/decay envelope and an optional pitch bend (for the sad droop).
+  function note(freq, start, dur, type, peak, bendTo) {
+    const c = ctx(), t = c.currentTime + start;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (bendTo) o.frequency.exponentialRampToValueAtTime(bendTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(out()); o.start(t); o.stop(t + dur + 0.03);
+  }
+  // Bright, triumphant major fanfare climbing to a held C-major chord.
+  function sndWin() {
+    if (state.muted) return;
+    try {
+      [[392, 0, 0.14], [523, 0.13, 0.14], [659, 0.26, 0.14], [784, 0.39, 0.18], [1046, 0.55, 0.5]]
+        .forEach(([f, s, d]) => note(f, s, d, 'triangle', 0.11));
+      [523, 659, 784].forEach((f) => note(f, 0.62, 0.95, 'triangle', 0.05)); // C major chord
+    } catch (e) {}
+  }
+  // Slow descending minor line with a drooping final note + low chord (sad-trombone feel).
+  function sndLose() {
+    if (state.muted) return;
+    try {
+      [[659, 0, 0.3], [587, 0.32, 0.3], [523, 0.64, 0.34]]
+        .forEach(([f, s, d]) => note(f, s, d, 'sawtooth', 0.07));
+      note(440, 1.02, 0.85, 'sawtooth', 0.075, 415.3); // final note droops A -> G#
+      [220, 261.6, 311.1].forEach((f) => note(f, 1.02, 0.95, 'sine', 0.05)); // low A-minor-ish chord
+    } catch (e) {}
+  }
+
   /* ---------- fireworks celebration (~2.6s) ---------- */
   let fwActive = false;
   function launchFireworks() {
@@ -418,6 +449,7 @@
     const you = grandTotal(0), ai = grandTotal(1);
     recordGameStats(you, ai);
     const t = you > ai ? 'You win! 🎉' : you < ai ? `${state.aiName} wins` : "It's a tie";
+    if (you > ai) sndWin(); else if (you < ai) sndLose();
     const newBest = you > state.best;
     if (newBest) {
       state.best = you;
