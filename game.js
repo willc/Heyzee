@@ -448,8 +448,9 @@
     updateTotals();
     const you = grandTotal(0), ai = grandTotal(1);
     recordGameStats(you, ai);
-    const t = you > ai ? 'You win! 🎉' : you < ai ? `${state.aiName} wins` : "It's a tie";
-    if (you > ai) sndWin(); else if (you < ai) sndLose();
+    const won = you > ai, lost = you < ai;
+    const t = won ? 'You win! 🎉' : lost ? 'You lose' : "It's a tie";
+    if (won) sndWin(); else if (lost) sndLose();
     const newBest = you > state.best;
     if (newBest) {
       state.best = you;
@@ -458,9 +459,16 @@
       const b = $('bestScore'); b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 2500);
     }
     $('overlayTitle').textContent = t;
-    $('overlayBody').innerHTML = `${escapeHtml(state.youName)} ${you} — ${escapeHtml(state.aiName)} ${ai}`
-      + (newBest ? `<br><span style="color:var(--accent);font-weight:700">🏆 New personal best!</span>`
-        : state.best ? `<br><span style="color:var(--ink-dim)">Best: ${state.best}</span>` : '');
+    // winner row on top, marked; loser dimmed; tie shows both neutral
+    const row = (name, score, cls, crown) =>
+      `<div class="result-row ${cls}"><span class="rname">${crown ? '👑 ' : ''}${escapeHtml(name)}</span><span class="rscore">${score}</span></div>`;
+    const youCls = won ? 'winner' : lost ? 'loser' : 'tie';
+    const aiCls = lost ? 'winner' : won ? 'loser' : 'tie';
+    const youRow = row(state.youName, you, youCls, won);
+    const aiRow = row(state.aiName, ai, aiCls, lost);
+    $('overlayBody').innerHTML =
+      (newBest ? `<div class="result-badge">🏆 New personal best!</div>` : '')
+      + `<div class="result">${won ? youRow + aiRow : lost ? aiRow + youRow : youRow + aiRow}</div>`;
     $('overlay').classList.remove('hidden');
   }
 

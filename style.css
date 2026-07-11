@@ -72,12 +72,8 @@ body {
   border-radius: var(--radius); padding: 12px 16px;
   transition: border-color .2s ease, box-shadow .2s ease;
 }
-.player.active { border-color: var(--accent); animation: playerPulse 2.6s ease-in-out infinite; }
+.player.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(232,195,126,.22), 0 8px 22px rgba(0,0,0,.3); }
 .player.active .ptotal { color: var(--accent); }
-@keyframes playerPulse {
-  0%, 100% { box-shadow: 0 0 0 1px var(--accent), 0 8px 22px rgba(0,0,0,.3); }
-  50% { box-shadow: 0 0 0 1px var(--accent), 0 0 22px rgba(232,195,126,.42), 0 8px 24px rgba(0,0,0,.35); }
-}
 .pname { font-size: 14px; color: var(--ink-dim); }
 .pname-input {
   font: inherit; font-size: 14px; color: var(--ink); background: transparent;
@@ -89,20 +85,9 @@ body {
 .ptotal { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; transition: color .3s ease; }
 
 .dice-tray {
-  position: relative;
   display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
-  min-height: 92px; padding: 24px 14px; margin: 4px 0 18px;
-  border-radius: 30px;
-  background: radial-gradient(58% 130% at 50% 44%, rgba(255,255,255,0.09), rgba(255,255,255,0) 72%);
+  min-height: 92px; padding: 14px; margin: 4px 0 18px;
 }
-/* soft contact shadow pooling the dice onto the felt */
-.dice-tray::after {
-  content: ''; position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
-  width: 66%; height: 20px; border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.30), transparent 72%);
-  z-index: 0; pointer-events: none;
-}
-.dice-tray .die { z-index: 1; }
 .die {
   width: 72px; height: 72px; border-radius: 16px;
   background: var(--die-face);
@@ -176,6 +161,20 @@ body {
 .modal h2 { color: var(--accent); margin-bottom: 10px; }
 .modal p { color: var(--ink-dim); margin-bottom: 22px; line-height: 1.5; }
 
+/* game-over result rows */
+.result { margin: 6px 0 20px; }
+.result-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; border-radius: 12px; margin-bottom: 8px;
+  border: 1px solid transparent;
+}
+.result-row .rname { flex: 1; text-align: left; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.result-row .rscore { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.result-row.winner { background: rgba(232,195,126,0.14); border-color: rgba(232,195,126,0.45); color: var(--accent); }
+.result-row.loser { color: var(--ink-dim); }
+.result-row.tie { background: rgba(255,255,255,0.05); border-color: var(--line); color: var(--ink); }
+.result-badge { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+
 .statsmodal { max-width: 420px; text-align: left; }
 .statsmodal h2 { text-align: center; margin-bottom: 20px; }
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
@@ -205,6 +204,5 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .players, .dice-tray, .controls, .status, .card-wrap { animation: none; }
-  .player.active { animation: none; box-shadow: 0 0 0 1px var(--accent), 0 8px 22px rgba(0,0,0,.3); }
   .die.rolling { animation: none; }
 }
