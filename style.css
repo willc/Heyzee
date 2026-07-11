@@ -23,9 +23,15 @@ body {
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   color: var(--ink);
-  background:
+  background-color: var(--felt-b);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(135% 115% at 50% -6%, transparent 46%, rgba(0,0,0,0.5) 100%),
     radial-gradient(120% 90% at 50% 0%, var(--felt-a), var(--felt-b));
+  background-size: 150px 150px, cover, cover;
+  background-repeat: repeat, no-repeat, no-repeat;
   background-attachment: fixed;
+  background-blend-mode: soft-light, normal, normal;
   padding: 20px clamp(12px, 4vw, 40px) 60px;
 }
 
@@ -59,14 +65,19 @@ body {
   align-items: start;
 }
 
-.players { display: flex; gap: 12px; margin-bottom: 18px; }
+.players { display: flex; gap: 12px; margin-bottom: 40px; }
 .player {
   flex: 1; display: flex; align-items: center; justify-content: space-between;
   background: var(--panel); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 12px 16px;
   transition: border-color .2s ease, box-shadow .2s ease;
 }
-.player.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 22px rgba(0,0,0,.3); }
+.player.active { border-color: var(--accent); animation: playerPulse 2.6s ease-in-out infinite; }
+.player.active .ptotal { color: var(--accent); }
+@keyframes playerPulse {
+  0%, 100% { box-shadow: 0 0 0 1px var(--accent), 0 8px 22px rgba(0,0,0,.3); }
+  50% { box-shadow: 0 0 0 1px var(--accent), 0 0 22px rgba(232,195,126,.42), 0 8px 24px rgba(0,0,0,.35); }
+}
 .pname { font-size: 14px; color: var(--ink-dim); }
 .pname-input {
   font: inherit; font-size: 14px; color: var(--ink); background: transparent;
@@ -75,12 +86,23 @@ body {
 }
 .pname-input:hover { border-bottom-color: var(--line); }
 .pname-input:focus { outline: none; border-bottom-color: var(--accent); color: var(--accent); }
-.ptotal { font-size: 24px; font-weight: 800; }
+.ptotal { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; transition: color .3s ease; }
 
 .dice-tray {
+  position: relative;
   display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
-  min-height: 92px; padding: 14px; margin-bottom: 16px;
+  min-height: 92px; padding: 24px 14px; margin: 4px 0 18px;
+  border-radius: 30px;
+  background: radial-gradient(58% 130% at 50% 44%, rgba(255,255,255,0.09), rgba(255,255,255,0) 72%);
 }
+/* soft contact shadow pooling the dice onto the felt */
+.dice-tray::after {
+  content: ''; position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+  width: 66%; height: 20px; border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.30), transparent 72%);
+  z-index: 0; pointer-events: none;
+}
+.dice-tray .die { z-index: 1; }
 .die {
   width: 72px; height: 72px; border-radius: 16px;
   background: var(--die-face);
@@ -171,4 +193,18 @@ body {
 @media (max-width: 820px) {
   .table { grid-template-columns: 1fr; }
   .die { width: 60px; height: 60px; }
+}
+
+/* subtle staggered entrance so the board arrives with a little life */
+@keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.players   { animation: riseIn .5s ease both; }
+.dice-tray { animation: riseIn .5s ease .07s both; }
+.controls  { animation: riseIn .5s ease .14s both; }
+.status    { animation: riseIn .5s ease .2s both; }
+.card-wrap { animation: riseIn .55s ease .26s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .players, .dice-tray, .controls, .status, .card-wrap { animation: none; }
+  .player.active { animation: none; box-shadow: 0 0 0 1px var(--accent), 0 8px 22px rgba(0,0,0,.3); }
+  .die.rolling { animation: none; }
 }
