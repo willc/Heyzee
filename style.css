@@ -189,6 +189,13 @@ body {
 .stat-tile.accent .stat-num { color: var(--accent); }
 @media (max-width: 480px) { .statsmodal { max-width: 92vw; } }
 
+.site-foot {
+  max-width: 980px; margin: 44px auto 0; text-align: center;
+  color: var(--ink-dim); font-size: 13px;
+}
+.site-foot a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.site-foot a:hover { text-decoration: underline; }
+
 @media (max-width: 820px) {
   .table { grid-template-columns: 1fr; }
   .die { width: 60px; height: 60px; }
