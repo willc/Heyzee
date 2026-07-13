@@ -215,11 +215,13 @@
     if (state.busy || state.current !== 0 || !state.hasRolled || state.rollsLeft === 0) return;
     state.held[i] = !state.held[i];
     sndHold();
-    renderDice();
+    renderDice(); updateControls(); updateStatus();
   }
 
+  function allHeld() { return state.hasRolled && state.held.every(Boolean); }
+
   function humanRoll() {
-    if (state.busy || state.current !== 0 || state.rollsLeft === 0) return;
+    if (state.busy || state.current !== 0 || state.rollsLeft === 0 || allHeld()) return;
     if (!state.hasRolled) $('lastMove').textContent = ''; // clear on your first roll of the turn
     state.busy = true;
     const final = state.dice.map((d, i) => (state.held[i] ? d : 1 + Math.floor(Math.random() * 6)));
@@ -392,10 +394,11 @@
       }
       return;
     }
+    if (allHeld()) { statusEl.textContent = 'All dice held. Pick a box to score.'; return; }
     statusEl.textContent = state.rollsLeft > 0 ? `Roll again or pick a box. (${state.rollsLeft} left)` : 'Last roll — pick a box.';
   }
   function updateControls() {
-    rollBtn.disabled = state.current !== 0 || state.rollsLeft === 0 || state.busy;
+    rollBtn.disabled = state.current !== 0 || state.rollsLeft === 0 || state.busy || allHeld();
     $('rollsLeft').textContent = `Rolls left: ${state.rollsLeft}`;
   }
   function updateTotals() {
