@@ -145,14 +145,18 @@ body {
 .scorecard tr.cat.open-you:hover td.val { background: rgba(122,209,154,.22); box-shadow: inset 0 0 0 1px var(--good); }
 .scorecard tr.cat.open-locked td.val { color: var(--ink-dim); opacity: .4; }
 /* armed (selected, pending Submit) box */
-.scorecard tr.cat.armed td.catname { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.scorecard tr.cat td.catname { position: relative; }
 .scorecard tr.cat.armed td.val { color: var(--accent); font-weight: 800; background: rgba(232,195,126,.26); box-shadow: inset 0 0 0 2px var(--accent); }
 .scorecard tr.cat.open-you.armed:hover td.val { background: rgba(232,195,126,.30); }
+/* while armed, keep the name on one line and reserve room for the Submit word (truncate if needed) */
+.scorecard tr.cat.armed td.catname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 82px; }
+/* absolutely positioned + no background so it never reflows the name or changes row height */
 .submit-score {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
   background: none; border: none; cursor: pointer;
-  color: var(--good); font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
-  padding: 0 8px; line-height: 1.2;
-  text-shadow: 0 0 8px rgba(122,209,154,.85), 0 0 16px rgba(122,209,154,.5);
+  color: var(--good); font-weight: 800; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 4px; line-height: 1;
+  text-shadow: 0 0 8px rgba(122,209,154,.9), 0 0 16px rgba(122,209,154,.55);
   animation: submitGlow 1.1s ease-in-out infinite alternate;
 }
 .submit-score:hover { color: #a8e6bf; }
