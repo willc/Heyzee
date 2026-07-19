@@ -149,13 +149,17 @@ body {
 .scorecard tr.cat.armed td.val { color: var(--accent); font-weight: 800; background: rgba(232,195,126,.26); box-shadow: inset 0 0 0 2px var(--accent); }
 .scorecard tr.cat.open-you.armed:hover td.val { background: rgba(232,195,126,.30); }
 .submit-score {
-  background: var(--accent); color: #23180a; border: none; cursor: pointer;
-  font-weight: 800; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
-  padding: 7px 16px; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.3);
-  animation: submitPop .22s ease;
+  background: none; border: none; cursor: pointer;
+  color: var(--good); font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 0 8px; line-height: 1.2;
+  text-shadow: 0 0 8px rgba(122,209,154,.85), 0 0 16px rgba(122,209,154,.5);
+  animation: submitGlow 1.1s ease-in-out infinite alternate;
 }
-.submit-score:hover { filter: brightness(1.06); }
-@keyframes submitPop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.submit-score:hover { color: #a8e6bf; }
+@keyframes submitGlow {
+  from { text-shadow: 0 0 5px rgba(122,209,154,.5), 0 0 10px rgba(122,209,154,.3); }
+  to   { text-shadow: 0 0 12px rgba(122,209,154,1), 0 0 22px rgba(122,209,154,.65); }
+}
 .scorecard tr.cat.used td.val, .scorecard tr.cat.used td.aival { color: var(--ink); }
 .scorecard tr.subtotal td { font-weight: 700; color: var(--accent); background: rgba(0,0,0,.15); }
 .scorecard tr.subtotal td:first-child { color: var(--ink-dim); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: .04em; }
@@ -226,9 +230,6 @@ body {
     padding: clamp(6px, 2vw, 12px);
   }
   .die .pip { width: clamp(6px, 2vw, 12px); height: clamp(6px, 2vw, 12px); }
-
-  /* bigger Submit tap target on touch screens */
-  .submit-score { padding: 13px 22px; font-size: 13px; }
 }
 
 @media (max-width: 400px) {
@@ -246,4 +247,5 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .players, .dice-tray, .controls, .status, .card-wrap { animation: none; }
   .die.rolling { animation: none; }
+  .submit-score { animation: none; }
 }
