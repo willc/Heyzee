@@ -18,6 +18,7 @@
     best: parseInt(localStorage.getItem('heyzee_best') || '0', 10) || 0,
     difficulty: localStorage.getItem('heyzee_diff') || 'medium',
     stats: loadStats(),
+    armed: null,
   };
   if (!HeyzeeAI.SKILL[state.difficulty]) state.difficulty = 'medium';
 
@@ -223,6 +224,7 @@
   function humanRoll() {
     if (state.busy || state.current !== 0 || state.rollsLeft === 0 || allHeld()) return;
     if (!state.hasRolled) $('lastMove').textContent = ''; // clear on your first roll of the turn
+    state.armed = null; // rerolling clears any pending score selection
     state.busy = true;
     const final = state.dice.map((d, i) => (state.held[i] ? d : 1 + Math.floor(Math.random() * 6)));
     state.rollsLeft--;
@@ -282,6 +284,7 @@
     state.held = [false, false, false, false, false];
     state.rollsLeft = 3;
     state.hasRolled = false;
+    state.armed = null;
     state.busy = state.current === 1; // set before UI updates so controls reflect it
     renderDice(); renderCard(); updateControls(); setActivePlayer();
     if (state.current === 1) {
@@ -351,11 +354,24 @@
 
     rows.push(sub('Grand total', grandTotal(0), grandTotal(1), 'grand'));
     cardEl.innerHTML = rows.join('');
+    // First tap arms a box (reveals Submit); tapping it again cancels.
     cardEl.querySelectorAll('tr.cat.open-you td.val').forEach((td) => {
       td.addEventListener('click', () => {
         if (state.current !== 0 || !state.hasRolled || state.busy) return;
         if (!legalCategories(state.dice, state.cards[0]).includes(td.dataset.cat)) return;
-        commitScore(0, td.dataset.cat); endTurn();
+        state.armed = state.armed === td.dataset.cat ? null : td.dataset.cat;
+        renderCard(); updateStatus();
+      });
+    });
+    // Submit commits the armed box.
+    cardEl.querySelectorAll('.submit-score').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (state.current !== 0 || !state.hasRolled || state.busy) return;
+        const cat = btn.dataset.cat;
+        if (!legalCategories(state.dice, state.cards[0]).includes(cat)) return;
+        state.armed = null;
+        commitScore(0, cat); endTurn();
       });
     });
   }
@@ -364,10 +380,15 @@
     const you = state.cards[0][c.id];
     const ai = state.cards[1][c.id];
     const open = you == null;
-    let cls = 'cat', youCell;
+    let cls = 'cat', youCell, nameCell = `<td class="catname">${c.name}</td>`;
     if (open && active) {
       const clickable = legal.includes(c.id);
+      const armed = state.armed === c.id;
       cls += clickable ? ' open-you' : ' open-locked';
+      if (armed) {
+        cls += ' armed';
+        nameCell = `<td class="catname">${c.name}<button class="submit-score" data-cat="${c.id}">Submit</button></td>`;
+      }
       youCell = `<td class="val" data-cat="${c.id}">${scoreCategory(c.id, state.dice, joker)}</td>`;
     } else if (open) {
       youCell = `<td class="val">–</td>`;
@@ -375,13 +396,19 @@
       cls += ' used';
       youCell = `<td class="val">${you}</td>`;
     }
-    return `<tr class="${cls}"><td class="catname">${c.name}</td>${youCell}<td class="aival">${ai == null ? '–' : ai}</td></tr>`;
+    return `<tr class="${cls}">${nameCell}${youCell}<td class="aival">${ai == null ? '–' : ai}</td></tr>`;
   }
 
   /* ---------- misc UI ---------- */
   function updateStatus() {
     if (state.current !== 0) return;
     if (!state.hasRolled) { statusEl.textContent = 'Your turn — roll the dice.'; return; }
+    if (state.armed) {
+      const joker = jokerActive(state.dice, state.cards[0]);
+      const nm = CATEGORIES.find((c) => c.id === state.armed).name;
+      statusEl.textContent = `Tap Submit to score ${scoreCategory(state.armed, state.dice, joker)} in ${nm}.`;
+      return;
+    }
     if (jokerActive(state.dice, state.cards[0])) {
       const legal = legalCategories(state.dice, state.cards[0]);
       const upperId = UPPER_IDS[state.dice[0] - 1];
