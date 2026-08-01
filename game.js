@@ -57,7 +57,7 @@
     const buf = c.createBuffer(1, n, sr), data = buf.getChannelData(0);
     for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2); // sharp, fast-decaying transient
     const src = c.createBufferSource(); src.buffer = buf;
-    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 1.8 + Math.random() * 1.4;
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 1.5 + Math.random() * 2.5;
     const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4500; // tame only the harshest hiss
     const g = c.createGain();
     g.gain.setValueAtTime(0.0001, when);
@@ -69,21 +69,19 @@
   function sndRoll() {
     if (state.muted) return;
     try {
-      const c = ctx();
-      let when = c.currentTime;
-      // a tumble of woody knocks, front-loaded then spreading out
-      const hits = 7 + Math.floor(Math.random() * 3);
+      const c = ctx(), t = c.currentTime;
+      // a chaotic tumble: knocks scattered at random times, with wide pitch/level variation
+      const hits = 8 + Math.floor(Math.random() * 4);
       for (let i = 0; i < hits; i++) {
-        const freq = 550 + Math.random() * 450;       // mid, woody clack pitches (audible on phone speakers)
-        const dur = 0.035 + Math.random() * 0.02;
-        const gain = 0.24 + Math.random() * 0.10;
+        const when = t + Math.random() * 0.46;         // random scatter = different every roll
+        const freq = 380 + Math.random() * 900;        // wide woody pitch spread (audible mids)
+        const dur = 0.03 + Math.random() * 0.05;
+        const gain = 0.14 + Math.random() * 0.20;      // dynamic: some soft, some loud
         clack(when, dur, freq, gain);
-        when += 0.028 + Math.random() * 0.05;
       }
-      // dice settling onto the felt: softer, lower thuds
-      const t = c.currentTime;
-      clack(t + 0.42, 0.08, 330, 0.34);
-      clack(t + 0.49, 0.09, 280, 0.30);
+      // dice settling onto the felt: softer, lower thuds (slightly randomized too)
+      clack(t + 0.40 + Math.random() * 0.06, 0.08, 300 + Math.random() * 80, 0.30);
+      clack(t + 0.48 + Math.random() * 0.06, 0.09, 250 + Math.random() * 70, 0.26);
     } catch (e) { /* no audio */ }
   }
   function sndHold() {
