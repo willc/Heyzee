@@ -50,32 +50,45 @@
     return ac;
   }
   function out() { return master; } // route sounds through the master gain
+  // One dice impact: a short noise burst through a resonant (high-Q) bandpass at a
+  // low, woody frequency, then a lowpass to remove the hiss — reads as a hollow knock.
   function clack(when, dur, freq, gain) {
     const c = ac, sr = c.sampleRate, n = Math.max(1, Math.floor(sr * dur));
     const buf = c.createBuffer(1, n, sr), data = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / n); // decaying noise
+    for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2); // sharp, fast-decaying transient
     const src = c.createBufferSource(); src.buffer = buf;
-    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 1.4;
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 5 + Math.random() * 5;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400; // tame harsh highs
     const g = c.createGain();
     g.gain.setValueAtTime(0.0001, when);
-    g.gain.exponentialRampToValueAtTime(gain, when + 0.004);
+    g.gain.exponentialRampToValueAtTime(gain, when + 0.002);
     g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-    src.connect(bp); bp.connect(g); g.connect(out());
+    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(out());
     src.start(when); src.stop(when + dur);
   }
   function sndRoll() {
     if (state.muted) return;
     try {
-      const c = ctx(), t = c.currentTime;
-      // a rattle: several clacks scattered over ~0.45s, then a settling pair
-      for (let i = 0; i < 7; i++) clack(t + Math.random() * 0.42, 0.05 + Math.random() * 0.05, 1400 + Math.random() * 2200, 0.10 + Math.random() * 0.08);
-      clack(t + 0.46, 0.09, 900, 0.14);
-      clack(t + 0.5, 0.07, 1600, 0.10);
+      const c = ctx();
+      let when = c.currentTime;
+      // a tumble of woody knocks, front-loaded then spreading out
+      const hits = 7 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < hits; i++) {
+        const freq = 250 + Math.random() * 520;       // low, woody clack pitches
+        const dur = 0.028 + Math.random() * 0.04;
+        const gain = 0.08 + Math.random() * 0.06;
+        clack(when, dur, freq, gain);
+        when += 0.028 + Math.random() * 0.05;
+      }
+      // dice settling onto the felt: softer, lower thuds
+      const t = c.currentTime;
+      clack(t + 0.42, 0.08, 190, 0.08);
+      clack(t + 0.49, 0.09, 155, 0.06);
     } catch (e) { /* no audio */ }
   }
   function sndHold() {
     if (state.muted) return;
-    try { const c = ctx(); clack(c.currentTime, 0.05, 2600, 0.10); } catch (e) {}
+    try { const c = ctx(); clack(c.currentTime, 0.035, 850, 0.09); } catch (e) {}
   }
   function sndScore() {
     if (state.muted) return;
