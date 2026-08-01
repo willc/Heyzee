@@ -57,8 +57,8 @@
     const buf = c.createBuffer(1, n, sr), data = buf.getChannelData(0);
     for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2); // sharp, fast-decaying transient
     const src = c.createBufferSource(); src.buffer = buf;
-    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 5 + Math.random() * 5;
-    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400; // tame harsh highs
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 1.8 + Math.random() * 1.4;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4500; // tame only the harshest hiss
     const g = c.createGain();
     g.gain.setValueAtTime(0.0001, when);
     g.gain.exponentialRampToValueAtTime(gain, when + 0.002);
@@ -74,21 +74,21 @@
       // a tumble of woody knocks, front-loaded then spreading out
       const hits = 7 + Math.floor(Math.random() * 3);
       for (let i = 0; i < hits; i++) {
-        const freq = 250 + Math.random() * 520;       // low, woody clack pitches
-        const dur = 0.028 + Math.random() * 0.04;
-        const gain = 0.08 + Math.random() * 0.06;
+        const freq = 550 + Math.random() * 450;       // mid, woody clack pitches (audible on phone speakers)
+        const dur = 0.035 + Math.random() * 0.02;
+        const gain = 0.24 + Math.random() * 0.10;
         clack(when, dur, freq, gain);
         when += 0.028 + Math.random() * 0.05;
       }
       // dice settling onto the felt: softer, lower thuds
       const t = c.currentTime;
-      clack(t + 0.42, 0.08, 190, 0.08);
-      clack(t + 0.49, 0.09, 155, 0.06);
+      clack(t + 0.42, 0.08, 330, 0.34);
+      clack(t + 0.49, 0.09, 280, 0.30);
     } catch (e) { /* no audio */ }
   }
   function sndHold() {
     if (state.muted) return;
-    try { const c = ctx(); clack(c.currentTime, 0.035, 850, 0.09); } catch (e) {}
+    try { const c = ctx(); clack(c.currentTime, 0.03, 950, 0.26); } catch (e) {}
   }
   function sndScore() {
     if (state.muted) return;
