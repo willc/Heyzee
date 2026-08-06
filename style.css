@@ -180,13 +180,13 @@ body {
 .overlay.hidden { display: none; }
 .modal { position: relative; background: linear-gradient(160deg, #262421, #17150f); border: 1px solid var(--line); border-radius: 20px; padding: 32px 40px; text-align: center; width: 100%; max-width: min(360px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
 .overlay-close {
-  position: fixed; top: 16px; right: 16px; z-index: 25;
-  width: 44px; height: 44px; border-radius: 50%;
+  position: absolute; top: 10px; right: 10px;
+  width: 34px; height: 34px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,.5); border: 1px solid var(--line); color: var(--ink);
-  font-size: 20px; line-height: 1; cursor: pointer; transition: background .2s ease;
+  background: rgba(255,255,255,.06); border: 1px solid var(--line); color: var(--ink-dim);
+  font-size: 15px; line-height: 1; cursor: pointer; transition: color .2s ease, background .2s ease;
 }
-.overlay-close:hover { background: rgba(0,0,0,.72); }
+.overlay-close:hover { color: var(--ink); background: rgba(255,255,255,.14); }
 .modal h2 { color: var(--accent); margin-bottom: 10px; }
 .modal p { color: var(--ink-dim); margin-bottom: 22px; line-height: 1.5; }
 
