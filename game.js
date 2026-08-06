@@ -437,6 +437,7 @@
     statusEl.textContent = state.rollsLeft > 0 ? `Roll again or pick a box. (${state.rollsLeft} left)` : 'Last roll — pick a box.';
   }
   function updateControls() {
+    if (state.gameOver) return; // Roll button acts as New Game while the game is over
     rollBtn.disabled = state.current !== 0 || state.rollsLeft === 0 || state.busy || allHeld();
     $('rollsLeft').textContent = `Rolls left: ${state.rollsLeft}`;
   }
@@ -519,9 +520,9 @@
   // Swap the Roll control for a New Game button once the game is over, so the
   // final-score overlay can be dismissed to view the board/stats.
   function setGameOverControls(won, lost) {
-    $('rollBtn').classList.add('hidden');
+    rollBtn.textContent = 'New Game';
+    rollBtn.disabled = false;
     $('rollsLeft').classList.add('hidden');
-    $('newGameCtrl').classList.remove('hidden');
     $('player-you').classList.remove('active');
     $('player-ai').classList.remove('active');
     statusEl.textContent = won ? 'You won! Start a new game when ready.'
@@ -538,8 +539,7 @@
     state.aiName = HeyzeeAI.aiRandomName();
     $('aiNameLabel').textContent = state.aiName;
     $('lastMove').textContent = '';
-    $('newGameCtrl').classList.add('hidden');
-    $('rollBtn').classList.remove('hidden');
+    rollBtn.textContent = 'Roll';
     $('rollsLeft').classList.remove('hidden');
     $('overlay').classList.add('hidden');
     updateTotals();
@@ -584,9 +584,8 @@
     localStorage.setItem('heyzee_diff', next);
     renderDifficulty();
   });
-  rollBtn.addEventListener('click', humanRoll);
+  rollBtn.addEventListener('click', () => { state.gameOver ? newGame() : humanRoll(); });
   $('newGameBtn').addEventListener('click', newGame);
-  $('newGameCtrl').addEventListener('click', newGame);
   // click the backdrop (outside the modal) to dismiss the final score and view the board
   $('overlay').addEventListener('click', (e) => { if (e.target === $('overlay')) $('overlay').classList.add('hidden'); });
   $('statsToggle').addEventListener('click', () => { renderStats(); $('statsOverlay').classList.remove('hidden'); });
