@@ -178,7 +178,9 @@ body {
 
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: grid; place-items: center; z-index: 20; }
 .overlay.hidden { display: none; }
-.modal { background: linear-gradient(160deg, #262421, #17150f); border: 1px solid var(--line); border-radius: 20px; padding: 32px 40px; text-align: center; width: 100%; max-width: min(360px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.modal { position: relative; background: linear-gradient(160deg, #262421, #17150f); border: 1px solid var(--line); border-radius: 20px; padding: 32px 40px; text-align: center; width: 100%; max-width: min(360px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.modal-close { position: absolute; top: 8px; right: 12px; background: none; border: none; color: var(--ink-dim); font-size: 20px; line-height: 1; cursor: pointer; padding: 8px 10px; border-radius: 8px; }
+.modal-close:hover { color: var(--ink); }
 .modal h2 { color: var(--accent); margin-bottom: 10px; }
 .modal p { color: var(--ink-dim); margin-bottom: 22px; line-height: 1.5; }
 

@@ -586,8 +586,9 @@
   });
   rollBtn.addEventListener('click', () => { state.gameOver ? newGame() : humanRoll(); });
   $('newGameBtn').addEventListener('click', newGame);
-  // click the backdrop (outside the modal) to dismiss the final score and view the board
+  // dismiss the final score (backdrop click or the ✕) to view the board without starting a new game
   $('overlay').addEventListener('click', (e) => { if (e.target === $('overlay')) $('overlay').classList.add('hidden'); });
+  $('overlayClose').addEventListener('click', () => $('overlay').classList.add('hidden'));
   $('statsToggle').addEventListener('click', () => { renderStats(); $('statsOverlay').classList.remove('hidden'); });
   $('statsClose').addEventListener('click', () => $('statsOverlay').classList.add('hidden'));
   $('statsOverlay').addEventListener('click', (e) => { if (e.target === $('statsOverlay')) $('statsOverlay').classList.add('hidden'); });
