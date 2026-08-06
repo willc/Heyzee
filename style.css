@@ -18,6 +18,7 @@ body.felt-burgundy { --felt-a: #6e1f2f; --felt-b: #3d0f18; }
 body.dice-inverted { --die-face: #16171b; --die-pip: #f7f4ee; --die-edge: rgba(0,0,0,0.6); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+.hidden { display: none !important; }
 
 body {
   min-height: 100vh;

@@ -19,6 +19,7 @@
     difficulty: localStorage.getItem('heyzee_diff') || 'medium',
     stats: loadStats(),
     armed: null,
+    gameOver: false,
   };
   if (!HeyzeeAI.SKILL[state.difficulty]) state.difficulty = 'medium';
 
@@ -510,7 +511,22 @@
     $('overlayBody').innerHTML =
       (newBest ? `<div class="result-badge">🏆 New personal best!</div>` : '')
       + `<div class="result">${won ? youRow + aiRow : lost ? aiRow + youRow : youRow + aiRow}</div>`;
+    state.gameOver = true;
+    setGameOverControls(won, lost);
     $('overlay').classList.remove('hidden');
+  }
+
+  // Swap the Roll control for a New Game button once the game is over, so the
+  // final-score overlay can be dismissed to view the board/stats.
+  function setGameOverControls(won, lost) {
+    $('rollBtn').classList.add('hidden');
+    $('rollsLeft').classList.add('hidden');
+    $('newGameCtrl').classList.remove('hidden');
+    $('player-you').classList.remove('active');
+    $('player-ai').classList.remove('active');
+    statusEl.textContent = won ? 'You won! Start a new game when ready.'
+      : lost ? `${state.aiName} won. Start a new game when ready.`
+      : "It's a tie. Start a new game when ready.";
   }
 
   function newGame() {
@@ -518,9 +534,13 @@
     state.yahtzeeBonus = [0, 0];
     state.current = 0;
     state.dice = [1, 1, 1, 1, 1];
+    state.gameOver = false;
     state.aiName = HeyzeeAI.aiRandomName();
     $('aiNameLabel').textContent = state.aiName;
     $('lastMove').textContent = '';
+    $('newGameCtrl').classList.add('hidden');
+    $('rollBtn').classList.remove('hidden');
+    $('rollsLeft').classList.remove('hidden');
     $('overlay').classList.add('hidden');
     updateTotals();
     startTurn();
@@ -566,6 +586,9 @@
   });
   rollBtn.addEventListener('click', humanRoll);
   $('newGameBtn').addEventListener('click', newGame);
+  $('newGameCtrl').addEventListener('click', newGame);
+  // click the backdrop (outside the modal) to dismiss the final score and view the board
+  $('overlay').addEventListener('click', (e) => { if (e.target === $('overlay')) $('overlay').classList.add('hidden'); });
   $('statsToggle').addEventListener('click', () => { renderStats(); $('statsOverlay').classList.remove('hidden'); });
   $('statsClose').addEventListener('click', () => $('statsOverlay').classList.add('hidden'));
   $('statsOverlay').addEventListener('click', (e) => { if (e.target === $('statsOverlay')) $('statsOverlay').classList.add('hidden'); });
